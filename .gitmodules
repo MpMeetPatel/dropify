@@ -1,0 +1,3 @@
+[submodule "dropify-client"]
+	path = dropify-client
+	url = git@github.com:MpMeetPatel/dropify-client.git
