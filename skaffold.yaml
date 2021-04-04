@@ -1,0 +1,42 @@
+apiVersion: skaffold/v2beta11
+kind: Config
+build:
+  local:
+    push: false
+  artifacts:
+    - image: auth
+      context: auth # folder name
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+    - image: dropin
+      context: dropIn # folder name
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+    - image: order
+      context: order # folder name
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+    - image: payment
+      context: payment # folder name
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+deploy:
+  kubectl:
+    manifests:
+    - ./infra/*

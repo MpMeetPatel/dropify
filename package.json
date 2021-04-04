@@ -1,0 +1,13 @@
+{
+  "name": "dropify",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "skaffold dev --no-prune=false --cache-artifacts=false"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

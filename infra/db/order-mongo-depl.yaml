@@ -1,0 +1,84 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: order-mongo-depl
+#   labels:
+#     app: order-mongo
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: order-mongo
+#   template:
+#     metadata:
+#       labels:
+#         app: order-mongo
+#     spec:
+#       containers:
+#       - name: order-mongo-docker
+#         image: mongo
+#         resources:
+#           limits:
+#             memory: "256Mi"
+#             cpu: "250m"
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: order-mongo-serv
+# spec:
+#   selector:
+#     app: order-mongo
+#   ports:
+#     - name: db
+#       protocol: TCP
+#       port: 27017
+#       targetPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-mongo
+  labels:
+    name: order-mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: order-mongo
+  clusterIP: None  
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: order-mongo-ss
+spec:
+  selector:
+    matchLabels:
+      app: order-mongo
+  serviceName: order-mongo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: order-mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-storage
+      spec:
+        storageClassName: manual
+        accessModes: ["ReadWriteMany"]
+        resources:
+          requests:
+            storage: 500Mi

@@ -1,0 +1,84 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: payment-mongo-depl
+#   labels:
+#     app: payment-mongo
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: payment-mongo
+#   template:
+#     metadata:
+#       labels:
+#         app: payment-mongo
+#     spec:
+#       containers:
+#       - name: payment-mongo-docker
+#         image: mongo
+#         resources:
+#           limits:
+#             memory: "256Mi"
+#             cpu: "250m"
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: payment-mongo-serv
+# spec:
+#   selector:
+#     app: payment-mongo
+#   ports:
+#     - name: db
+#       protocol: TCP
+#       port: 27017
+#       targetPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-mongo
+  labels:
+    name: payment-mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: payment-mongo
+  clusterIP: None  
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: payment-mongo-ss
+spec:
+  selector:
+    matchLabels:
+      app: payment-mongo
+  serviceName: payment-mongo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: payment-mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-storage
+      spec:
+        storageClassName: manual
+        accessModes: ["ReadWriteMany"]
+        resources:
+          requests:
+            storage: 500Mi

@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-srv
+spec:
+  rules:
+  - host: "dropify.dev"
+    http: 
+      paths: 
+        - path: /api/user
+          pathType: Prefix
+          backend:
+            service:
+              name: auth-srv
+              port:
+                number: 3000
+        - path: /api/dropin
+          pathType: Prefix
+          backend:
+            service:
+              name: dropin-srv
+              port:
+                number: 3000
+        - path: /api/order
+          pathType: Prefix
+          backend:
+            service:
+              name: order-srv
+              port:
+                number: 3000
+        - path: /api/payment
+          pathType: Prefix
+          backend:
+            service:
+              name: payment-srv
+              port:
+                number: 3000
+        - path: /rabbitmq
+          pathType: Prefix
+          backend:
+            service:
+              name: rabbitmq-serv
+              port:
+                number: 8080

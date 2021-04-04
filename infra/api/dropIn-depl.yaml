@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dropin-depl
+  labels:
+    app: dropin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dropin
+  template:
+    metadata:
+      labels:
+        app: dropin
+    spec:
+      containers:
+      - name: dropin-docker
+        image: dropin
+        imagePullPolicy: Never
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 3000
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dropin-srv
+spec:
+  selector:
+    app: dropin
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

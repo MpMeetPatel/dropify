@@ -1,0 +1,28 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: nfs-client
+# spec:
+#   selector:
+#     matchLabels:
+#       app: nfs-client
+#   template:
+#     metadata:
+#       labels:
+#         app: nfs-client
+#     spec:
+#       containers:
+#       - name: nfs-client-provisioner
+#         image: quay.io/external_storage/nfs-client-provisioner:latest
+#         volumeMounts:
+#           - name: nfs-client-root
+#             mountPath: /persistentvolumes
+#         resources:
+#           limits:
+#             memory: "128Mi"
+#             cpu: "500m"
+#       volumes:
+#         - name: nfs-client-root
+#           nfs:
+#             path: /nfs/auth
+#             server: 192.168.10.104 # <your nfs ip>

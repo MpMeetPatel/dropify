@@ -1,0 +1,84 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: dropin-mongo-depl
+#   labels:
+#     app: dropin-mongo
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: dropin-mongo
+#   template:
+#     metadata:
+#       labels:
+#         app: dropin-mongo
+#     spec:
+#       containers:
+#       - name: dropin-mongo-docker
+#         image: mongo
+#         resources:
+#           limits:
+#             memory: "256Mi"
+#             cpu: "250m"
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: dropin-mongo-serv
+# spec:
+#   selector:
+#     app: dropin-mongo
+#   ports:
+#     - name: db
+#       protocol: TCP
+#       port: 27017
+#       targetPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dropin-mongo
+  labels:
+    name: dropin-mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: dropin-mongo
+  clusterIP: None  
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dropin-mongo-ss
+spec:
+  selector:
+    matchLabels:
+      app: dropin-mongo
+  serviceName: dropin-mongo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dropin-mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-storage
+      spec:
+        storageClassName: manual
+        accessModes: ["ReadWriteMany"]
+        resources:
+          requests:
+            storage: 500Mi

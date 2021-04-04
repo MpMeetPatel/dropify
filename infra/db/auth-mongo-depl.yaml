@@ -1,0 +1,86 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: auth-mongo-depl
+#   labels:
+#     app: auth-mongo
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: auth-mongo
+#   template:
+#     metadata:
+#       labels:
+#         app: auth-mongo
+#     spec:
+#       containers:
+#       - name: auth-mongo-docker
+#         image: mongo
+#         ports:
+#           - containerPort: 27017
+#         resources:
+#           limits:
+#             memory: "256Mi"
+#             cpu: "250m"
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: auth-mongo-serv
+# spec:
+#   selector:
+#     app: auth-mongo
+#   ports:
+#     - name: db
+#       protocol: TCP
+#       port: 27017
+#       targetPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-mongo
+  labels:
+    name: auth-mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: auth-mongo
+  clusterIP: None  
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: auth-mongo-ss
+spec:
+  selector:
+    matchLabels:
+      app: auth-mongo
+  serviceName: auth-mongo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: auth-mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-persistent-storage
+      spec:
+        storageClassName: manual
+        accessModes: ["ReadWriteMany"]
+        resources:
+          requests:
+            storage: 500Mi
